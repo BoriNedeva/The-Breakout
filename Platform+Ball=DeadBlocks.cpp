@@ -2,10 +2,12 @@
 #include <vector>
 #include <conio.h>
 #include <time.h>
+#include <setjmp.h>
 
 #include "ConsoleGaming.h"
 
 using namespace std;
+
 
 HANDLE consoleHandle;
 
@@ -34,6 +36,7 @@ vector<GameObject> blocks;
 vector<GameObject> platform;
 
 unsigned int blockSpawnInterval = 10;
+
 
 void Update()
 {
@@ -89,38 +92,78 @@ void Draw()
 
 }
 
+void MainMenu()
+{
+	int menuChoice;
+	ClearScreen(consoleHandle);
+	cout << "1 - New game" << endl;
+	cout << "2 - How to play" << endl;
+	cout << "3 - Score" << endl;
+	cout << "0 - Exit" << endl;
+	cin >> menuChoice;
+	switch (menuChoice)
+	{
+	case 1:
+		{
+			while (true)
+			{
+				Update();
+				Draw();
+				Sleep(sleepDuration);
+			}
+			break;
+		  }
+	case 2:
+		{
+			cout << "blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah" << endl;
+			break;
+		  }
+	case 3:
+		{
+			cout << "Highest score:" << endl;
+			break;
+			}
+	case 0:
+		{   
+			ClearScreen(consoleHandle);
+			exit(0);
+			break;
+		   }
+	default: 
+		{
+			MainMenu(); 
+			 }
+
+	}
+	
+}
+
 int main()
 {
-	consoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+		consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	srand(time(NULL));
+		srand(time(NULL));
 
-	int platformY = WindowHeight - 1;
-	int platformX = WindowWidth / 2 - platformLength / 2;
-	char platformSymbol = '-';
+		int platformY = WindowHeight - 1;
+		int platformX = WindowWidth / 2 - platformLength / 2;
+		char platformSymbol = '-';
 
-	for (int i = 0; i < platformLength; i++)
-	{
-		platform.push_back(GameObject(platformX + i, platformY, platformSymbol));
-	}
-
-
-	// Generate blocks
-	int blocksPerColumn = 3;
-	for (int i = 0; i < WindowWidth - 1; i++)
-	{
-		for (int j = 0; j < blocksPerColumn; j++)
+		for (int i = 0; i < platformLength; i++)
 		{
-			blocks.push_back(GameObject(i, j, BlockSymbol));
+			platform.push_back(GameObject(platformX + i, platformY, platformSymbol));
 		}
-	}
 
-	while (true)
-	{
-		Update();
-		Draw();
-		Sleep(sleepDuration);
-	}
 
-	return 0;
+		// Generate blocks
+		int blocksPerColumn = 3;
+		for (int i = 0; i < WindowWidth - 1; i++)
+		{
+			for (int j = 0; j < blocksPerColumn; j++)
+			{
+				blocks.push_back(GameObject(i, j, BlockSymbol));
+			}
+		}
+		MainMenu();
+		cout << "5";
+		return 0;
 }
