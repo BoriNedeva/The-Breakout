@@ -2,7 +2,6 @@
 #include <vector>
 #include <conio.h>
 #include <time.h>
-#include <setjmp.h>
 
 #include "ConsoleGaming.h"
 
@@ -37,7 +36,28 @@ vector<GameObject> platform;
 
 unsigned int blockSpawnInterval = 10;
 
+int highestScore = 0;
 
+void MainMenu();
+void GameOver();
+
+void CollisionDetection()
+{
+	for (randomAccess_iterator block = blocks.begin(); block != blocks.end(); ++block)
+	{
+		// Remove any block that is hit by the ball
+		if (ball.Coordinates.X == block->Coordinates.X && ball.Coordinates.Y == block->Coordinates.Y && block->Color != 0x0)
+		{
+			block->Color = 0x0;
+			if (ball.Coordinates.Y <= 0)
+			{
+				ballSpeed = -ballSpeed;
+			}
+			ballSpeed = -ballSpeed;
+		}
+		// Implement unit collision
+	}
+}
 void Update()
 {
 	COORD direction = { 0, 0 };
@@ -47,31 +67,42 @@ void Update()
 		switch (key)
 		{
 		case 'a':
-			direction.X = -ballSpeed;
+			direction.X = -platformSpeed;
 			break;
 		case 'd':
-			direction.X = ballSpeed;
-			break;;
+			direction.X = platformSpeed;
+			break;
+		case 'm': 
+			MainMenu();
+			break;
 		};
+	}
+	if (((platform.end() - 1)->Coordinates.X >= WindowWidth - 1 && direction.X > 0) ||
+		(platform.begin()->Coordinates.X <= 0 && direction.X < 0))
+	{
+		direction.X = 0;
 	}
 	for (randomAccess_iterator platformBody = platform.begin(); platformBody != platform.end(); ++platformBody)
 	{
-		platformBody->Coordinates.X += direction.X;
-		platformBody->Coordinates.Y += direction.Y;
+			platformBody->Coordinates.X += direction.X;
+			platformBody->Coordinates.Y += direction.Y;
 	}
-
 	ball.Coordinates.Y += ballSpeed;
-	if (ball.Coordinates.Y >= WindowHeight - 1 || ball.Coordinates.Y <= 0)
+
+	// Loop trough all blocks
+	CollisionDetection();
+	if (ball.Coordinates.Y <= 0)
 	{
 		ballSpeed = -ballSpeed;
 	}
-
-	// Loop trough all blocks
-	for (randomAccess_iterator block = blocks.begin(); block != blocks.end(); ++block)
+	if (ball.Coordinates.Y == WindowHeight - 1 && ball.Coordinates.X >= platform.begin()->Coordinates.X && ball.Coordinates.X <= (platform.end()-1)->Coordinates.X)
 	{
-		// Remove any block that is hit by the ball
-		// Implement unit collision
+		ballSpeed = -ballSpeed;
+		//GameOver();
+
 	}
+	
+
 }
 
 void Draw()
@@ -92,51 +123,6 @@ void Draw()
 
 }
 
-void MainMenu()
-{
-	int menuChoice;
-	ClearScreen(consoleHandle);
-	cout << "1 - New game" << endl;
-	cout << "2 - How to play" << endl;
-	cout << "3 - Score" << endl;
-	cout << "0 - Exit" << endl;
-	cin >> menuChoice;
-	switch (menuChoice)
-	{
-	case 1:
-		{
-			while (true)
-			{
-				Update();
-				Draw();
-				Sleep(sleepDuration);
-			}
-			break;
-		  }
-	case 2:
-		{
-			cout << "blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah" << endl;
-			break;
-		  }
-	case 3:
-		{
-			cout << "Highest score:" << endl;
-			break;
-			}
-	case 0:
-		{   
-			ClearScreen(consoleHandle);
-			exit(0);
-			break;
-		   }
-	default: 
-		{
-			MainMenu(); 
-			 }
-
-	}
-	
-}
 
 int main()
 {
@@ -164,6 +150,70 @@ int main()
 			}
 		}
 		MainMenu();
-		cout << "5";
 		return 0;
+}
+void MainMenu()
+{
+	int menuChoice;
+	ClearScreen(consoleHandle);
+	cout << "1 - New game" << endl;
+	cout << "2 - How to play" << endl;
+	cout << "3 - Highest score" << endl;
+	cout << "0 - Exit" << endl;
+	cin >> menuChoice;
+	switch (menuChoice)
+	{
+	case 1:
+		{
+			while (true)
+			{
+				Update();
+				Draw();
+				Sleep(sleepDuration);
+			}
+			break;
+		  }
+	case 2:
+		{
+			ClearScreen(consoleHandle);
+			//Instructions();
+			cout << "Press m to return to the Main menu." << endl;
+			while (true)
+			{
+				if (kbhit())
+				{
+					char key = getch();
+					if (key == 'm')
+						MainMenu();
+				};
+			}
+			break;
+		  }
+	case 3:
+		{
+			ClearScreen(consoleHandle);
+			cout << "Highest score: " << highestScore << endl;
+			cout << "Press m to return to the Main menu." << endl;
+			while (true)
+			{
+				if (kbhit())
+				{
+					char key1 = getch();
+					if (key1 == 'm')
+						MainMenu();
+				};				
+			}
+			break;
+		  }
+	case 0:
+		{
+			ClearScreen(consoleHandle);
+			exit(0);
+			break;
+		  }
+	default:
+		{
+			MainMenu();
+		   }
+	}
 }
