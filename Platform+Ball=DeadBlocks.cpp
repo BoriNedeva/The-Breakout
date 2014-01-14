@@ -17,7 +17,8 @@ typedef vector<GameObject>::const_iterator const_iterator;
 const int WindowWidth = 70;
 const int WindowHeight = 30;
 // Block variables
-const char BlockSymbol = '-';
+const char BlockSymbols[3] = { '-', '+', '=' };
+char platformSymbol = '-';
 int blockSpeed = 1;
 
 // Ball variables
@@ -36,11 +37,20 @@ vector<GameObject> platform;
 
 unsigned int blockSpawnInterval = 10;
 
+// Gameplay variables
 int highestScore = 0;
+int score = 0;
+bool isNotGameOver = true;
+int bonus = 0;
 
 void MainMenu();
 void GameOver();
 
+char GenerateRandomBlock()
+{
+	int length = sizeof(BlockSymbols);
+	return BlockSymbols[rand() % length];
+}
 void CollisionDetection()
 {
 	for (randomAccess_iterator block = blocks.begin(); block != blocks.end(); ++block)
@@ -48,12 +58,28 @@ void CollisionDetection()
 		// Remove any block that is hit by the ball
 		if (ball.Coordinates.X == block->Coordinates.X && ball.Coordinates.Y == block->Coordinates.Y && block->Color != 0x0)
 		{
-			block->Color = 0x0;
+			cout << '\a';
+			
 			if (ball.Coordinates.Y <= 0)
 			{
 				ballSpeed = -ballSpeed;
 			}
 			ballSpeed = -ballSpeed;
+			switch (block->Symbol)
+			{
+			case '-':{
+						block->Color = 0x0;
+						++score;
+					 }break;
+			case '=':{
+						block->Symbol = '-';
+					 }break;
+			case '+':{
+						block->Color = 0x0;
+						++score;
+						++bonus;
+					 }break;
+			}
 		}
 		// Implement unit collision
 	}
@@ -61,6 +87,7 @@ void CollisionDetection()
 void Update()
 {
 	COORD direction = { 0, 0 };
+
 	if (kbhit())
 	{
 		char key = getch();
@@ -95,11 +122,18 @@ void Update()
 	{
 		ballSpeed = -ballSpeed;
 	}
-	if (ball.Coordinates.Y == WindowHeight - 1 && ball.Coordinates.X >= platform.begin()->Coordinates.X && ball.Coordinates.X <= (platform.end()-1)->Coordinates.X)
+	if (ball.Coordinates.Y == WindowHeight - 1 && 
+		ball.Coordinates.X >= platform.begin()->Coordinates.X && 
+		ball.Coordinates.X <= (platform.end()-1)->Coordinates.X)
 	{
 		ballSpeed = -ballSpeed;
-		//GameOver();
 
+	}
+	if (ball.Coordinates.Y == WindowHeight + 1 && 
+		(ball.Coordinates.X < platform.begin()->Coordinates.X || ball.Coordinates.X > (platform.end() - 1)->Coordinates.X))
+	{
+		GameOver();
+	
 	}
 	
 
@@ -108,7 +142,12 @@ void Update()
 void Draw()
 {
 	ClearScreen(consoleHandle);
-
+	if (bonus == 1)
+	{
+		platform.push_back(GameObject((platform.end()-1)->Coordinates.X + 1, WindowHeight - 1, platformSymbol));
+		bonus = 0;
+	}
+		
 	for (const_iterator platformBody = platform.cbegin(); platformBody != platform.cend(); ++platformBody)
 	{
 		platformBody->Draw(consoleHandle);
@@ -132,7 +171,6 @@ int main()
 
 		int platformY = WindowHeight - 1;
 		int platformX = WindowWidth / 2 - platformLength / 2;
-		char platformSymbol = '-';
 
 		for (int i = 0; i < platformLength; i++)
 		{
@@ -146,7 +184,7 @@ int main()
 		{
 			for (int j = 0; j < blocksPerColumn; j++)
 			{
-				blocks.push_back(GameObject(i, j, BlockSymbol));
+				blocks.push_back(GameObject(i, j, GenerateRandomBlock()));
 			}
 		}
 		MainMenu();
@@ -154,11 +192,13 @@ int main()
 }
 void MainMenu()
 {
+	isNotGameOver = true;
 	int menuChoice;
 	ClearScreen(consoleHandle);
 	cout << "1 - New game" << endl;
 	cout << "2 - How to play" << endl;
 	cout << "3 - Highest score" << endl;
+	cout << "4 - Settings" << endl;
 	cout << "0 - Exit" << endl;
 	cin >> menuChoice;
 	switch (menuChoice)
@@ -168,7 +208,14 @@ void MainMenu()
 			while (true)
 			{
 				Update();
-				Draw();
+				if (isNotGameOver)
+				{
+					Draw();
+				}
+				else
+				{
+					
+				}
 				Sleep(sleepDuration);
 			}
 			break;
@@ -216,4 +263,22 @@ void MainMenu()
 			MainMenu();
 		   }
 	}
+}
+
+void GameOver()
+{
+	Sleep(1000);
+	isNotGameOver = false;
+	ClearScreen(consoleHandle);
+	cout << "GAME OVER!!!" << endl << endl;
+	cout << "Press m to return to the Main menu." << endl;
+	if (kbhit())
+	{
+		char key = getch();
+		if (key == 'm')
+		{
+			MainMenu();
+		}
+	}
+	
 }
