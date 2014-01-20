@@ -13,7 +13,7 @@ private:
 	static ConsoleColor BackgroundColor;
 public: 
 	COORD Coordinates;
-	char Symbol;
+    char Symbol;
 	ConsoleColor Color;
 
 	GameObject::GameObject(COORD coordinates, char symbol) :

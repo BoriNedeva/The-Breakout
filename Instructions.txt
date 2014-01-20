@@ -1,0 +1,14 @@
+Use "A" and "D" buttons to move the paddle and bounce ball back at the blocks.
+
+Every "-" block broken out gives you 1 point.
+Every "=" block broken out transforms to a "-" block.
+Every "+" block broken out gives you 1 point and 1 bonus point.
+On every 3 bonus points the paddle will become longer.
+
+When you break all the blocks you will go to next level with 1 row more blocks.
+
+When your ball is lost, you will see the "Game Over" window.
+
+You can return to the main menu at any time by pressing the "M" button.
+
+Peace!
